@@ -1,0 +1,49 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+url = "https://www.feirasdobrasil.com.br/demo2026/cal2026.asp?mes_evento=janeiro&pagina=1"
+
+
+response = requests.get(url)
+html = response.text
+
+
+soup = BeautifulSoup(html, "html.parser")
+
+eventos = []
+
+
+
+for bloco in soup.find_all("div", class_="texto"):  
+    nome = bloco.find("b").text.strip() if bloco.find("b") else ""
+    texto = bloco.get_text(separator="\n").split("\n")
+
+    
+    data = ""
+    local = ""
+    cidade_uf = ""
+    acesso = ""
+
+    for linha in texto:
+        if "Data:" in linha:
+            data = linha.replace("Data:", "").strip()
+        if "Local:" in linha:
+            local = linha.replace("Local:", "").strip()
+        if "Cidade/UF:" in linha:
+            cidade_uf = linha.replace("Cidade/UF:", "").strip()
+        if "Acesso ao Evento:" in linha:
+            acesso = linha.replace("Acesso ao Evento:", "").strip()
+
+    eventos.append({
+        "Nome": nome,
+        "Data": data,
+        "Local": local,
+        "Cidade/UF": cidade_uf,
+        "Acesso": acesso
+    })
+
+df = pd.DataFrame(eventos)
+df.to_csv("feiras_janeiro_2026.csv", index=False)
+
+print("Extração concluída! Total:", len(eventos))
