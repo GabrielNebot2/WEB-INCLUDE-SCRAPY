@@ -1,0 +1,32 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+url = "https://www.feirasdobrasil.com.br/demo2026/cal2026.asp?mes_evento=janeiro&pagina=1"
+
+response = requests.get(url)
+response.raise_for_status()
+
+soup = BeautifulSoup(response.text, "html.parser")
+
+eventos = []
+
+ajustar dependendo do site)
+for evento in soup.select(".evento"):
+    data = evento.select_one(".data").get_text(strip=True)
+    hora = evento.select_one(".hora").get_text(strip=True)
+    segmento = evento.select_one(".segmento").get_text(strip=True)
+    nome = evento.select_one(".nome").get_text(strip=True)
+
+    eventos.append({
+        "data": data,
+        "hora_local": hora,
+        "segmento": segmento,
+        "nome_evento": nome
+    })
+
+df = pd.DataFrame(eventos)
+
+df.to_csv("eventos.csv", index=False, encoding="utf-8-sig")
+
+print("CSV gerado com sucesso!")
